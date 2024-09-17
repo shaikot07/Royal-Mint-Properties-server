@@ -1,5 +1,5 @@
 const express = require('express');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 require('dotenv').config();
 const app = express();
@@ -31,6 +31,7 @@ async function run() {
         // Send a ping to confirm a successful connection
         // our Custom code start for crud 
         const userCollection = client.db('Royal-Mint-Properties').collection('users');
+        const postCollection = client.db('Royal-Mint-Properties').collection('blog');
 
         app.post('/users', async (req, res) => {
             const user = req.body;
@@ -43,10 +44,71 @@ async function run() {
             const result = await userCollection.insertOne(user);
             res.send(result);
         })
-        app.get('/users',  async (req, res) => {
+        app.get('/users', async (req, res) => {
             const result = await userCollection.find().toArray();
             res.send(result)
         });
+
+        // Create a new post
+        app.post('/api/blog', async (req, res) => {
+            const post = req.body;
+            try {
+                const result = await postCollection.insertOne(post);
+                res.status(201).send(result);
+            } catch (error) {
+                res.status(500).send({ error: 'Error creating post' });
+            }
+        });
+
+        // Get all posts
+        app.get('/api/blog', async (req, res) => {
+            try {
+                const posts = await postCollection.find().toArray();
+                res.status(200).send(posts);
+            } catch (error) {
+                res.status(500).send({ error: 'Error fetching posts' });
+            }
+        });
+
+        // Get a post by ID
+        app.get('/api/blog/:id', async (req, res) => {
+            try {
+                const post = await postCollection.findOne({ _id: ObjectId(req.params.id) });
+                if (!post) {
+                    return res.status(404).send({ error: 'Post not found' });
+                }
+                res.status(200).send(post);
+            } catch (error) {
+                res.status(500).send({ error: 'Error fetching post' });
+            }
+        });
+        // Get a blog updated  by ID
+        app.patch('/api/blog/:id', async (req, res) => {
+            const item = req.body;
+            console.log(item);
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const updatedDoc = {
+                $set: {
+                    // ---------
+                    title: item.title,
+                    content: item.content,
+                    image: item.updatedImageUrl,
+                    seoKeyWord: item.seoKeyWord
+                }
+            }
+
+            const result = await postCollection.updateOne(filter, updatedDoc)
+            res.send(result);
+        })
+
+        app.delete('/api/blog/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await postCollection.deleteOne(query);
+            res.send(result)
+        })
+
         // our Custom code end for crud 
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
