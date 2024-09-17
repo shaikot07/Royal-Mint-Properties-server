@@ -52,6 +52,15 @@ async function run() {
         // our Custom code start for crud 
         const userCollection = client.db('Royal-Mint-Properties').collection('users');
 
+
+        // sign In
+        app.post('/signIn', async (req, res) => {
+            const { email, uid } = req.body;
+            const token = jwt.sign({ email, uid }, process.env.ACCESS_TOKEN, { expiresIn: '1d' });
+            res.send({ status: '200', token });
+        })
+
+
         app.post('/users', async (req, res) => {
             const user = req.body;
             // insert email if user  dose't exists 
