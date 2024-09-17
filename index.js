@@ -47,7 +47,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        // await client.connect();
         // Send a ping to confirm a successful connection
         // our Custom code start for crud 
         const userCollection = client.db('Royal-Mint-Properties').collection('users');
@@ -77,7 +77,6 @@ async function run() {
             const result = await userCollection.find().toArray();
             res.send(result);
         })
-
         // our Custom code end for crud 
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
