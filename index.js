@@ -142,6 +142,12 @@ async function run() {
                 res.status(500).send({ error: 'Error fetching posts' });
             }
         });
+        app.get('/api/blogs', async (req, res) => {
+            const page = parseInt(req.query.page);
+            const size = parseInt(req.query.size);
+            const result = await postCollection.find().skip(page * size).limit(size).toArray();
+            res.send(result);
+        })
 
         // Get a post by ID
         app.get('/api/blog/:id', async (req, res) => {
