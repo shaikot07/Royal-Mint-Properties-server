@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken')
 
 var admin = require("firebase-admin");
 
-var serviceAccount = require("./react-sunglass-firebase-adminsdk-wgv95-6c2e13cd20.json");
+var serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_SDK);
 
 // middlewer
 app.use(cors());
