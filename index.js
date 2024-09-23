@@ -6,6 +6,10 @@ const app = express();
 const port = process.env.PORT || 5000;
 const jwt = require('jsonwebtoken')
 
+var admin = require("firebase-admin");
+
+var serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_SDK);
+
 // middlewer
 app.use(cors());
 app.use(express.json());
@@ -54,6 +58,24 @@ async function run() {
         const postCollection = client.db('Royal-Mint-Properties').collection('blog');
 
 
+        // Firebase admin Start Here
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount)
+        });
+
+        console.log("Firebase admin initialized successfully.");
+        // Firebase admin End Here
+
+        // Test api to load all user form firebase
+        app.get('/firebase/users', async (req, res) => {
+            const users = [];
+            const listUsersResult = await admin.auth().listUsers(1000);
+            listUsersResult.users.forEach((userRecord) => {
+                users.push(userRecord.toJSON());
+            });
+            res.status(200).json(users);
+        })
+
         // sign In
         app.post('/signIn', async (req, res) => {
             const { email, uid } = req.body;
@@ -62,19 +84,19 @@ async function run() {
         })
 
 
-        app.post('/users', async (req, res) => {
-            const user = req.body;
-            // insert email if user  dose't exists 
-            const query = { email: user.email }
+        // app.post('/users', async (req, res) => {
+        //     const user = req.body;
+        //     // insert email if user  dose't exists 
+        //     const query = { email: user.email }
 
-            const existingUser = await userCollection.findOne(query);
+        //     const existingUser = await userCollection.findOne(query);
 
-            if (existingUser) {
-                return res.send({ message: 'User already exists', insertedId: null })
-            }
-            const result = await userCollection.insertOne(user);
-            res.send(result);
-        })
+        //     if (existingUser) {
+        //         return res.send({ message: 'User already exists', insertedId: null })
+        //     }
+        //     const result = await userCollection.insertOne(user);
+        //     res.send(result);
+        // })
 
         // app.get('/users', async (req, res) => {
         //     const result = await userCollection.find().toArray();
@@ -82,6 +104,38 @@ async function run() {
         // });
 
         // Load user with pagination
+
+        app.post('/addUser', async (req, res) => {
+            const { email, password, firstName, lastName, address, image, imagePublicId } = req.body;
+
+            try {
+                // Create user as Firebase Admin 
+                const userRecord = await admin.auth().createUser({
+                    email,
+                    password,
+                    displayName: `${firstName} ${lastName}`
+                });
+
+                // Optionally, store additional user data in your MongoDB
+                const userData = {
+                    firstName,
+                    lastName,
+                    address,
+                    email,
+                    image,
+                    firebaseId: userRecord.uid,
+                    imagePublicId
+                };
+
+                const result = await userCollection.insertOne(userData);
+
+                res.status(201).send({ insertedId: result.insertedId });
+            } catch (error) {
+                console.error('Error adding user:', error);
+                res.status(500).send({ message: 'Failed to add user', error });
+            }
+        });
+
         app.get('/users', async (req, res) => {
             const page = parseInt(req.query.page);
             const size = parseInt(req.query.size);
@@ -92,16 +146,35 @@ async function run() {
         //load total user for pagination
         app.get('/totalUsers', async (req, res) => {
             const totalUser = await userCollection.estimatedDocumentCount();
-            res.send({totalUser});
+            res.send({ totalUser });
         })
 
         // Delete User
+        // app.delete('/users/:id', async (req, res) => {
+        //     const id = req.params.id;
+        //     const query = { _id: new ObjectId(id) };
+        //     const result = await userCollection.deleteOne(query);
+        //     res.send(result);
+        // })
+
         app.delete('/users/:id', async (req, res) => {
             const id = req.params.id;
+            const user = await userCollection.findOne({ _id: new ObjectId(id) });
+
+            if (!user) {
+                return res.status(404).send({ message: "user not found" });
+            }
+
+            // Delete the user from firebase
+            await admin.auth().deleteUser(user.firebaseId)
+
+            // Delete the user from mongodb
             const query = { _id: new ObjectId(id) };
             const result = await userCollection.deleteOne(query);
             res.send(result);
-        })
+        });
+
+
 
         // Update User
         app.put('/users/:id', async (req, res) => {
