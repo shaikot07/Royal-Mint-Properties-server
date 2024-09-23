@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken')
 
 var admin = require("firebase-admin");
 
-var serviceAccount = require("./react-sunglass-firebase-adminsdk-wgv95-6c2e13cd20.json");
+var serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_SDK);
 
 // middlewer
 app.use(cors());
@@ -84,29 +84,30 @@ async function run() {
         })
 
 
-        // app.post('/users', async (req, res) => {
-        //     const user = req.body;
-        //     // insert email if user  dose't exists 
-        //     const query = { email: user.email }
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            // insert email if user  dose't exists 
+            const query = { email: user.email }
 
-        //     const existingUser = await userCollection.findOne(query);
+            const existingUser = await userCollection.findOne(query);
 
-        //     if (existingUser) {
-        //         return res.send({ message: 'User already exists', insertedId: null })
-        //     }
-        //     const result = await userCollection.insertOne(user);
-        //     res.send(result);
-        // })
+            if (existingUser) {
+                return res.send({ message: 'User already exists', insertedId: null })
+            }
+            const result = await userCollection.insertOne(user);
+            res.send(result);
+        })
 
-        // app.get('/users', async (req, res) => {
-        //     const result = await userCollection.find().toArray();
-        //     res.send(result)
-        // });
+        app.get('/users', async (req, res) => {
+            const result = await userCollection.find().toArray();
+            res.send(result)
+        });
 
         // Load user with pagination
 
         app.post('/addUser', async (req, res) => {
             const { email, password, firstName, lastName, address, image, imagePublicId } = req.body;
+            console.log(email, password, firstName, lastName, address, image, imagePublicId);
 
             try {
                 // Create user as Firebase Admin 
@@ -215,6 +216,12 @@ async function run() {
                 res.status(500).send({ error: 'Error fetching posts' });
             }
         });
+        app.get('/api/blogs', async (req, res) => {
+            const page = parseInt(req.query.page);
+            const size = parseInt(req.query.size);
+            const result = await postCollection.find().skip(page * size).limit(size).toArray();
+            res.send(result);
+        })
 
         // Get a post by ID
         app.get('/api/blog/:id', async (req, res) => {
