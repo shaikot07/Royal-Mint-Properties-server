@@ -4,7 +4,8 @@ const cors = require('cors');
 require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 
 var admin = require("firebase-admin");
 
@@ -13,6 +14,16 @@ var serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_SDK);
 // middlewer
 app.use(cors());
 app.use(express.json());
+
+
+// Development Transporter 
+let transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'allendodul6@gmail.com',
+        pass: 'nzxs dfgp qrvg futw'
+    }
+})
 
 const uri = `mongodb+srv://${process.env.DB_user}:${process.env.DB_pass}@learnmongo.htgdx.mongodb.net/?retryWrites=true&w=majority&appName=learnMongo`;
 
@@ -263,6 +274,314 @@ async function run() {
             res.send(result)
         })
 
+
+        /*******************Nodemailer API's********************/
+
+        // General Inquiries
+        app.post('/api/message/generalInquiries', async (req, res) => {
+            const { name, phone, email, message } = req.body;
+
+            const mailOptions = {
+                from: email,
+                to: 'allendodul6@gmail.com',
+                subject: 'General Inquiry Message from Website',
+                html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 10px; background-color: #f9f9f9;">
+                    <h2 style="text-align: center; color: #350C38; font-size: 24px; border-bottom: 2px solid #C2AB92; padding-bottom: 10px;">General Inquiry</h2>
+                    
+                    <div style="padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Name:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${name}</p>
+        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Phone:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${phone}</p>
+        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Email:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${email}</p>
+        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Message:</p>
+                        <p style="color: #555; font-size: 16px;">${message}</p>
+                    </div>
+                </div>
+                `
+            }
+
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    return res.send(500).json({ error: error.toString() });
+                }
+                res.send(200).json({ success: true, message: 'Email sent successfully', response: info.response });
+            })
+        })
+
+        app.post('/api/message/propertyManagement', async (req, res) => {
+            const { name, email, subject, message, number } = req.body;
+
+            const mailOptions = {
+                form: email,
+                to: 'allendodul6@gmail.com',
+                subject: `${subject} Message from Website`,
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 10px; background-color: #f9f9f9;">
+                    <h2 style="text-align: center; color: #350C38; font-size: 24px; border-bottom: 2px solid #C2AB92; padding-bottom: 10px;">${subject}</h2>
+                    
+                    <div style="padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Name:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${name}</p>
+        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Phone:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${number}</p>
+        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Email:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${email}</p>
+        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Message:</p>
+                        <p style="color: #555; font-size: 16px;">${message}</p>
+                    </div>
+                </div>
+                `
+            }
+
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    return res.send(500).json({ error: error.toString() });
+                }
+                res.send(200).json({ success: true, message: 'Email sent successfully', response: info.response })
+            })
+        })
+
+        app.post('/api/message/propertyRenovation', async (req, res) => {
+            const { name, email, subject, message, number } = req.body;
+
+            const mailOptions = {
+                form: email,
+                to: 'allendodul6@gmail.com',
+                subject: `${subject} Message from Website`,
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 10px; background-color: #f9f9f9;">
+                    <h2 style="text-align: center; color: #350C38; font-size: 24px; border-bottom: 2px solid #C2AB92; padding-bottom: 10px;">${subject}</h2>
+                    
+                    <div style="padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Name:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${name}</p>
+        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Phone:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${number}</p>
+        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Email:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${email}</p>
+        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Message:</p>
+                        <p style="color: #555; font-size: 16px;">${message}</p>
+                    </div>
+                </div>
+                `
+            }
+
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    return res.send(500).json({ error: error.toString() });
+                }
+                res.send(200).json({ success: true, message: 'Email sent successfully', response: info.response })
+            })
+        })
+
+
+        app.post('/api/message/propertyDevelopment', async (req, res) => {
+            const { name, email, subject, message, number } = req.body;
+
+            const mailOptions = {
+                form: email,
+                to: 'allendodul6@gmail.com',
+                subject: `${subject} Message from Website`,
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 10px; background-color: #f9f9f9;">
+                    <h2 style="text-align: center; color: #350C38; font-size: 24px; border-bottom: 2px solid #C2AB92; padding-bottom: 10px;">${subject}</h2>
+                    
+                    <div style="padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Name:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${name}</p>
+        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Phone:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${number}</p>
+        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Email:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${email}</p>
+        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Message:</p>
+                        <p style="color: #555; font-size: 16px;">${message}</p>
+                    </div>
+                </div>
+                `
+            }
+
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    return res.send(500).json({ error: error.toString() });
+                }
+                res.send(200).json({ success: true, message: 'Email sent successfully', response: info.response })
+            })
+        })
+
+        app.post('/api/message/investWithUs', async (req, res) => {
+            const { name, email, subject, message, number } = req.body;
+
+            const mailOptions = {
+                form: email,
+                to: 'allendodul6@gmail.com',
+                subject: `${subject} Message from Website`,
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 10px; background-color: #f9f9f9;">
+                    <h2 style="text-align: center; color: #350C38; font-size: 24px; border-bottom: 2px solid #C2AB92; padding-bottom: 10px;">${subject}</h2>
+                    
+                    <div style="padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Name:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${name}</p>
+        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Phone:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${number}</p>
+        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Email:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${email}</p>
+        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Message:</p>
+                        <p style="color: #555; font-size: 16px;">${message}</p>
+                    </div>
+                </div>
+                `
+            }
+
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    return res.send(500).json({ error: error.toString() });
+                }
+
+                res.send(200).json({ success: true, message: 'Email sent successfully', response: info.response });
+            })
+        })
+
+        app.post('/api/message/managementDevelopment', async (req, res) => {
+            const { name, email, subject, message, number } = req.body;
+            const mailOptions = {
+                form: email,
+                to: 'allendodul6@gmail.com',
+                subject: `${subject} Message from Website`,
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 10px; background-color: #f9f9f9;">
+                    <h2 style="text-align: center; color: #350C38; font-size: 24px; border-bottom: 2px solid #C2AB92; padding-bottom: 10px;">${subject}</h2>
+                    
+                    <div style="padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Name:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${name}</p>
+        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Phone:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${number}</p>
+        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Email:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${email}</p>
+        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Message:</p>
+                        <p style="color: #555; font-size: 16px;">${message}</p>
+                    </div>
+                </div>
+                `
+            }
+
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    return res.send(500).json({ error: error.toString() });
+                }
+
+                res.send(200).json({ success: true, message: 'Email sent successfully', response: info.response });
+            })
+        })
+
+        app.post('/api/message/contactMessage', async (req, res) => {
+            const { name, email, phone, postcode } = req.body;
+
+            const mailOptions = {
+                form: email,
+                to: 'allendodul6@gmail.com',
+                subject: 'Property Valuation Request from Website',
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 10px; background-color: #f9f9f9;">
+                    <h2 style="text-align: center; color: #350C38; font-size: 24px; border-bottom: 2px solid #C2AB92; padding-bottom: 10px;">Property Valuation Request: ${postcode}</h2>
+                    
+                    <div style="padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Name:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${name}</p>
+        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Phone:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${phone}</p>
+        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Email:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${email}</p>
+
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Postcode:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${postcode}</p>
+                    </div>
+                </div>
+                `
+            }
+
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    return res.send(500).json({ error: error.toString() });
+                }
+                res.send(200).json({ success: true, message: 'Email sent successfully', response: info.response })
+            })
+        })
+
+        app.post('/api/message/valuationRequest', async (req, res) => {
+            const { name, phone, bedrooms, propertyType, valuationType, doorNumber, streetName, city, postcode } = req.body;
+
+            const mailOptions = {
+                form: 'allendodul6@gmail.com',
+                to: 'allendodul6@gmail.com',
+                subject: 'Property Valuation Request from Website',
+                html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 10px; background-color: #f9f9f9;">
+                    <h2 style="text-align: center; color: #350C38; font-size: 24px; border-bottom: 2px solid #C2AB92; padding-bottom: 10px;">Property Valuation Request: ${postcode}</h2>
+                    
+                    <div style="padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Name:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${name}</p>
+        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Phone:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${phone}</p>
+        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Number of Bedrooms:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${bedrooms}</p>
+
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Property Type:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${propertyType}</p>
+
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Type of Valuation:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${valuationType}</p>
+
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Door Number:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${doorNumber}</p>
+
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Street Name:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${streetName}</p>
+                        
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">City Name:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${city}</p>
+
+                        <p style="color: #333; font-size: 18px; font-weight: bold;">Postcode:</p>
+                        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">${postcode}</p>
+                    </div>
+                </div>
+            `
+            }
+
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    return res.send(500).json({ error: error.toString() });
+                }
+                res.send(200).json({ success: true, message: 'Email sent successfully', response: info.response });
+            })
+        })
         // our Custom code end for crud 
         // await client.db("admin").command({ ping: 1 });
         // console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -280,9 +599,4 @@ app.get('/', (req, res) => {
 
 app.listen(port, () => {
     console.log(`simple CRUD is Running on port,${port}`);
-})
-
-
-
-
-
+});
